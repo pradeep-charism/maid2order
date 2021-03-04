@@ -17,6 +17,7 @@
  */
 package nus.edu.maid2order.db;
 
+import nus.edu.maid2order.domain.Customer;
 import nus.edu.maid2order.domain.Maid;
 import nus.edu.maid2order.domain.MaidUsagePlan;
 import nus.edu.maid2order.domain.UsagePlan;
@@ -42,8 +43,10 @@ class DatabaseLoader {
     CommandLineRunner loadMaids(MaidRepository repository) {
 
         return args -> {
-            repository.save(new Maid("Frodo", "Baggins", "ring bearer"));
-            repository.save(new Maid("Bilbo", "Baggins", "burglar"));
+            repository.save(new Maid("Blue", "Cook"));
+            repository.save(new Maid("Red", "Washing"));
+            repository.save(new Maid("Green", "All tasks"));
+            repository.save(new Maid("Yellow", "Child Care"));
         };
     }
 
@@ -51,11 +54,20 @@ class DatabaseLoader {
     CommandLineRunner loadMaidUsagePlan(MaidUsagePlanRepository repository) {
 
         return args -> {
-            repository.save(new MaidUsagePlan(UsagePlan.ONE_TIME));
-            repository.save(new MaidUsagePlan(UsagePlan.ONCE_A_FORTNIGHT));
-            repository.save(new MaidUsagePlan(UsagePlan.ONCE_A_WEEK));
-            repository.save(new MaidUsagePlan(UsagePlan.TWICE_A_WEEK));
+            repository.save(new MaidUsagePlan(UsagePlan.ONE_TIME, 10.0));
+            repository.save(new MaidUsagePlan(UsagePlan.ONCE_A_FORTNIGHT, 15.0));
+            repository.save(new MaidUsagePlan(UsagePlan.ONCE_A_WEEK, 10.0));
+            repository.save(new MaidUsagePlan(UsagePlan.TWICE_A_WEEK, 30.0));
         };
     }
 
+    @Bean
+    CommandLineRunner loadCustomers(CustomerRepository repository) {
+
+        return args -> {
+            repository.save(new Customer("Tom"));
+            repository.save(new Customer("David"));
+            repository.save(new Customer("Henry"));
+        };
+    }
 }

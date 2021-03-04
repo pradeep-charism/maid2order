@@ -17,10 +17,12 @@
  */
 package nus.edu.maid2order.controller;
 
+import nus.edu.maid2order.db.CustomerRepository;
 import nus.edu.maid2order.db.MaidRepository;
 import nus.edu.maid2order.db.MaidUsagePlanRepository;
 import nus.edu.maid2order.domain.Maid;
 import nus.edu.maid2order.domain.MaidUsagePlan;
+import nus.edu.maid2order.domain.UsagePlan;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,18 +49,21 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
  * @author Pradeep Kumar
  */
 @RestController
-public class MaidController {
+public class AgencyManager {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(MaidController.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(AgencyManager.class);
 
     @Autowired
-    private final MaidRepository repository;
+    private final MaidRepository maidRepository;
 
     @Autowired
     private MaidUsagePlanRepository maidUsagePlan;
 
-    public MaidController(MaidRepository repository) {
-        this.repository = repository;
+    @Autowired
+    private CustomerRepository customerRepository;
+
+    public AgencyManager(MaidRepository maidRepository) {
+        this.maidRepository = maidRepository;
     }
 
     /**
@@ -70,13 +75,13 @@ public class MaidController {
 
         List<EntityModel<MaidUsagePlan>> maidUsagePlans = StreamSupport.stream(maidUsagePlan.findAll().spliterator(), false)
                 .map(plan -> new EntityModel<>(plan, //
-                        linkTo(methodOn(MaidController.class).findMaidById(plan.getId())).withSelfRel(), //
-                        linkTo(methodOn(MaidController.class).showAllMaidUsagePlans()).withRel("maidUsagePlans"))) //
+                        linkTo(methodOn(AgencyManager.class).findMaidById(plan.getId())).withSelfRel(), //
+                        linkTo(methodOn(AgencyManager.class).showAllMaidUsagePlans()).withRel("maidUsagePlans"))) //
                 .collect(Collectors.toList());
 
         return ResponseEntity.ok( //
                 new CollectionModel<>(maidUsagePlans, //
-                        linkTo(methodOn(MaidController.class).showAllMaidUsagePlans()).withSelfRel()));
+                        linkTo(methodOn(AgencyManager.class).showAllMaidUsagePlans()).withSelfRel()));
     }
 
     /**
@@ -86,26 +91,27 @@ public class MaidController {
     @GetMapping("/fetchAllMaids")
     ResponseEntity<CollectionModel<EntityModel<Maid>>> fetchAllMaids() {
 
-        List<EntityModel<Maid>> maids = StreamSupport.stream(repository.findAll().spliterator(), false)
+        List<EntityModel<Maid>> maids = StreamSupport.stream(maidRepository.findAll().spliterator(), false)
                 .map(maid -> new EntityModel<>(maid, //
-                        linkTo(methodOn(MaidController.class).findMaidById(maid.getId())).withSelfRel(), //
-                        linkTo(methodOn(MaidController.class).fetchAllMaids()).withRel("allMaids"))) //
+                        linkTo(methodOn(AgencyManager.class).findMaidById(maid.getId())).withSelfRel(), //
+                        linkTo(methodOn(AgencyManager.class).fetchAllMaids()).withRel("allMaids"))) //
                 .collect(Collectors.toList());
 
         return ResponseEntity.ok( //
                 new CollectionModel<>(maids, //
-                        linkTo(methodOn(MaidController.class).fetchAllMaids()).withSelfRel()));
+                        linkTo(methodOn(AgencyManager.class).fetchAllMaids()).withSelfRel()));
     }
 
-    @PostMapping("/hireNewMaid")
+    @PostMapping("/hireNewMaid/{plan}")
     @ResponseStatus(HttpStatus.CREATED)
-    ResponseEntity<EntityModel<Maid>> hireNewMaid(@RequestBody Maid maid) {
+    ResponseEntity<EntityModel<Maid>> hireNewMaid(@RequestBody Maid maid, @PathVariable UsagePlan plan) {
 
         try {
-            Maid savedMaid = repository.save(maid);
+            LOGGER.info("Hiring Maid: [{}], Usage plan: [{}]", maid, plan);
+            Maid savedMaid = maidRepository.save(maid);
 
             EntityModel<Maid> maidResource = new EntityModel<>(savedMaid, //
-                    linkTo(methodOn(MaidController.class).findMaidById(savedMaid.getId())).withSelfRel());
+                    linkTo(methodOn(AgencyManager.class).findMaidById(savedMaid.getId())).withSelfRel());
 
             return ResponseEntity //
                     .created(new URI(maidResource.getRequiredLink(IanaLinkRelations.SELF).getHref())) //
@@ -124,10 +130,10 @@ public class MaidController {
     @GetMapping("/findMaidBy/{id}")
     ResponseEntity<EntityModel<Maid>> findMaidById(@PathVariable long id) {
 
-        return repository.findById(id) //
+        return maidRepository.findById(id) //
                 .map(maid -> new EntityModel<>(maid, //
-                        linkTo(methodOn(MaidController.class).findMaidById(maid.getId())).withSelfRel(), //
-                        linkTo(methodOn(MaidController.class).fetchAllMaids()).withRel("maids"))) //
+                        linkTo(methodOn(AgencyManager.class).findMaidById(maid.getId())).withSelfRel(), //
+                        linkTo(methodOn(AgencyManager.class).fetchAllMaids()).withRel("maids"))) //
                 .map(ResponseEntity::ok) //
                 .orElse(ResponseEntity.notFound().build());
     }
@@ -145,9 +151,9 @@ public class MaidController {
 
         Maid maidToUpdate = maid;
         maidToUpdate.setId(id);
-        repository.save(maidToUpdate);
+        maidRepository.save(maidToUpdate);
 
-        Link newlyCreatedLink = linkTo(methodOn(MaidController.class).findMaidById(id)).withSelfRel();
+        Link newlyCreatedLink = linkTo(methodOn(AgencyManager.class).findMaidById(id)).withSelfRel();
 
         return ResponseEntity.noContent().location(new URI(newlyCreatedLink.getHref())).build();
 
@@ -159,20 +165,21 @@ public class MaidController {
      * @param id
      * @return
      */
-    @DeleteMapping("/releaseMaid/{id}")
+    @DeleteMapping("/terminateMaid/{id}")
     @ResponseStatus(HttpStatus.OK)
-    ResponseEntity<CollectionModel<EntityModel<Maid>>> releaseMaid(@PathVariable long id) {
+    ResponseEntity<CollectionModel<EntityModel<Maid>>> terminateMaid(@PathVariable long id) {
         LOGGER.info("Releasing maid with id: [{}]", id);
-        repository.deleteById(id);
+        maidRepository.deleteById(id);
 
-        List<EntityModel<Maid>> maids = StreamSupport.stream(repository.findAll().spliterator(), false)
+        List<EntityModel<Maid>> maids = StreamSupport.stream(maidRepository.findAll().spliterator(), false)
                 .map(maid -> new EntityModel<>(maid, //
-                        linkTo(methodOn(MaidController.class).showAllMaidUsagePlans()).withRel("maidUsagePlans"), //
-                        linkTo(methodOn(MaidController.class).fetchAllMaids()).withRel("allMaids"))) //
+                        linkTo(methodOn(AgencyManager.class).showAllMaidUsagePlans()).withRel("maidUsagePlans"), //
+                        linkTo(methodOn(AgencyManager.class).fetchAllMaids()).withRel("allMaids"))) //
                 .collect(Collectors.toList());
 
         return ResponseEntity.ok( //
                 new CollectionModel<>(maids, //
-                        linkTo(methodOn(MaidController.class).fetchAllMaids()).withSelfRel()));
+                        linkTo(methodOn(AgencyManager.class).fetchAllMaids()).withSelfRel()));
     }
+
 }

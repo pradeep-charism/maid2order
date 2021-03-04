@@ -13,24 +13,15 @@ import javax.persistence.Id;
 @Entity
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 @AllArgsConstructor
-public class MaidUsagePlan {
+public class Customer {
 
     @Id
     @GeneratedValue
     private Long id;
-    private UsagePlan usagePlan;
-    private Double cost;
 
-    public MaidUsagePlan(UsagePlan plan, Double cost) {
-        this.usagePlan = plan;
-        this.cost = cost;
-    }
+    private String name;
 
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
+    public Customer(String name) {
+        this.name = name;
     }
 }
