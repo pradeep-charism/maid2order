@@ -42,7 +42,7 @@ import lombok.NoArgsConstructor;
 @Entity
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 @AllArgsConstructor
-class Employee {
+class Maid {
 
 	@Id
 	@GeneratedValue
@@ -61,7 +61,7 @@ class Employee {
 	 * @param lastName
 	 * @param role
 	 */
-	Employee(String firstName, String lastName, String role) {
+	Maid(String firstName, String lastName, String role) {
 
 		this.firstName = firstName;
 		this.lastName = lastName;

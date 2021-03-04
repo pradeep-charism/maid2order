@@ -22,7 +22,6 @@ import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.info.License;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
@@ -30,15 +29,15 @@ import org.springframework.context.annotation.Bean;
 @SpringBootApplication
 public class SpringdocApplication {
 
-	public static void main(String[] args) {
-		SpringApplication.run(SpringdocApplication.class, args);
-	}
+    public static void main(String[] args) {
+        SpringApplication.run(SpringdocApplication.class, args);
+    }
 
-	@Bean
-	public OpenAPI customOpenAPI() {
-		return new OpenAPI()
-				.components(new Components())
-				.info(new Info().title("Employee API").version("1.5.5")
-						.license(new License().name("Apache 2.0").url("http://springdoc.org")));
-	}
+    @Bean
+    public OpenAPI customOpenAPI() {
+        return new OpenAPI()
+                .components(new Components())
+                .info(new Info().title("Maid2Order API").version("1.5.5")
+                        .license(new License().name("Apache 2.0").url("http://springdoc.org")));
+    }
 }

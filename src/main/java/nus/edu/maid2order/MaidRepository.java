@@ -17,13 +17,12 @@
  */
 package nus.edu.maid2order;
 
-import nus.edu.maid2order.Employee;
 import org.springframework.data.repository.CrudRepository;
 
 /**
- * A simple Spring Data {@link CrudRepository} for storing {@link Employee}s.
+ * A simple Spring Data {@link CrudRepository} for storing {@link Maid}s.
  *
  * @author Greg Turnquist
  */
-interface EmployeeRepository extends CrudRepository<Employee, Long> {
+interface MaidRepository extends CrudRepository<Maid, Long> {
 }

@@ -40,11 +40,11 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
  * @author Pradeep Kumar
  */
 @RestController
-class EmployeeController {
+class MaidController {
 
-	private final EmployeeRepository repository;
+	private final MaidRepository repository;
 
-	EmployeeController(EmployeeRepository repository) {
+	MaidController(MaidRepository repository) {
 		this.repository = repository;
 	}
 
@@ -53,28 +53,28 @@ class EmployeeController {
 	 * {@link ResponseEntity} fluent API.
 	 */
 	@GetMapping("/employees")
-	ResponseEntity<CollectionModel<EntityModel<Employee>>> findAll() {
+	ResponseEntity<CollectionModel<EntityModel<Maid>>> findAll() {
 
-		List<EntityModel<Employee>> employees = StreamSupport.stream(repository.findAll().spliterator(), false)
-				.map(employee -> new EntityModel<>(employee, //
-						linkTo(methodOn(EmployeeController.class).findOne(employee.getId())).withSelfRel(), //
-						linkTo(methodOn(EmployeeController.class).findAll()).withRel("employees"))) //
+		List<EntityModel<Maid>> employees = StreamSupport.stream(repository.findAll().spliterator(), false)
+				.map(maid -> new EntityModel<>(maid, //
+						linkTo(methodOn(MaidController.class).findOne(maid.getId())).withSelfRel(), //
+						linkTo(methodOn(MaidController.class).findAll()).withRel("employees"))) //
 				.collect(Collectors.toList());
 
 		return ResponseEntity.ok( //
 				new CollectionModel<>(employees, //
-						linkTo(methodOn(EmployeeController.class).findAll()).withSelfRel()));
+						linkTo(methodOn(MaidController.class).findAll()).withSelfRel()));
 	}
 
 	@PostMapping("/employees")
 	@ResponseStatus(HttpStatus.CREATED)
-	ResponseEntity<EntityModel<Employee>> newEmployee(@RequestBody Employee employee) {
+	ResponseEntity<EntityModel<Maid>> newEmployee(@RequestBody Maid maid) {
 
 		try {
-			Employee savedEmployee = repository.save(employee);
+			Maid savedMaid = repository.save(maid);
 
-			EntityModel<Employee> employeeResource = new EntityModel<>(savedEmployee, //
-					linkTo(methodOn(EmployeeController.class).findOne(savedEmployee.getId())).withSelfRel());
+			EntityModel<Maid> employeeResource = new EntityModel<>(savedMaid, //
+					linkTo(methodOn(MaidController.class).findOne(savedMaid.getId())).withSelfRel());
 
 			return ResponseEntity //
 					.created(new URI(employeeResource.getRequiredLink(IanaLinkRelations.SELF).getHref())) //
@@ -86,18 +86,18 @@ class EmployeeController {
 	}
 
 	/**
-	 * Look up a single {@link Employee} and transform it into a REST resource. Then return it through Spring Web's
+	 * Look up a single {@link Maid} and transform it into a REST resource. Then return it through Spring Web's
 	 * {@link ResponseEntity} fluent API.
 	 *
 	 * @param id
 	 */
 	@GetMapping("/employees/{id}")
-	ResponseEntity<EntityModel<Employee>> findOne(@PathVariable long id) {
+	ResponseEntity<EntityModel<Maid>> findOne(@PathVariable long id) {
 
 		return repository.findById(id) //
-				.map(employee -> new EntityModel<>(employee, //
-						linkTo(methodOn(EmployeeController.class).findOne(employee.getId())).withSelfRel(), //
-						linkTo(methodOn(EmployeeController.class).findAll()).withRel("employees"))) //
+				.map(maid -> new EntityModel<>(maid, //
+						linkTo(methodOn(MaidController.class).findOne(maid.getId())).withSelfRel(), //
+						linkTo(methodOn(MaidController.class).findAll()).withRel("employees"))) //
 				.map(ResponseEntity::ok) //
 				.orElse(ResponseEntity.notFound().build());
 	}
@@ -105,19 +105,19 @@ class EmployeeController {
 	/**
 	 * Update existing employee then return a Location header.
 	 *
-	 * @param employee
+	 * @param maid
 	 * @param id
 	 * @return
 	 */
 	@PutMapping("/employees/{id}")
 	@ResponseStatus(HttpStatus.NO_CONTENT)
-	ResponseEntity<Void> updateEmployee(@RequestBody Employee employee, @PathVariable long id) throws URISyntaxException {
+	ResponseEntity<Void> updateEmployee(@RequestBody Maid maid, @PathVariable long id) throws URISyntaxException {
 
-		Employee employeeToUpdate = employee;
-		employeeToUpdate.setId(id);
-		repository.save(employeeToUpdate);
+		Maid maidToUpdate = maid;
+		maidToUpdate.setId(id);
+		repository.save(maidToUpdate);
 
-		Link newlyCreatedLink = linkTo(methodOn(EmployeeController.class).findOne(id)).withSelfRel();
+		Link newlyCreatedLink = linkTo(methodOn(MaidController.class).findOne(id)).withSelfRel();
 
 		return ResponseEntity.noContent().location(new URI(newlyCreatedLink.getHref())).build();
 
