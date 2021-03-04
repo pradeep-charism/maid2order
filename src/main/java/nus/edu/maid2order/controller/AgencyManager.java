@@ -21,7 +21,6 @@ import nus.edu.maid2order.db.CustomerRepository;
 import nus.edu.maid2order.db.MaidRepository;
 import nus.edu.maid2order.db.MaidUsagePlanRepository;
 import nus.edu.maid2order.domain.Maid;
-import nus.edu.maid2order.domain.MaidUsagePlan;
 import nus.edu.maid2order.domain.UsagePlan;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -64,24 +63,6 @@ public class AgencyManager {
 
     public AgencyManager(MaidRepository maidRepository) {
         this.maidRepository = maidRepository;
-    }
-
-    /**
-     * Look up all maids usage plans
-     * {@link ResponseEntity} fluent API.
-     */
-    @GetMapping("/showAllMaidUsagePlans")
-    ResponseEntity<CollectionModel<EntityModel<MaidUsagePlan>>> showAllMaidUsagePlans() {
-
-        List<EntityModel<MaidUsagePlan>> maidUsagePlans = StreamSupport.stream(maidUsagePlan.findAll().spliterator(), false)
-                .map(plan -> new EntityModel<>(plan, //
-                        linkTo(methodOn(AgencyManager.class).findMaidById(plan.getId())).withSelfRel(), //
-                        linkTo(methodOn(AgencyManager.class).showAllMaidUsagePlans()).withRel("maidUsagePlans"))) //
-                .collect(Collectors.toList());
-
-        return ResponseEntity.ok( //
-                new CollectionModel<>(maidUsagePlans, //
-                        linkTo(methodOn(AgencyManager.class).showAllMaidUsagePlans()).withSelfRel()));
     }
 
     /**
@@ -173,7 +154,7 @@ public class AgencyManager {
 
         List<EntityModel<Maid>> maids = StreamSupport.stream(maidRepository.findAll().spliterator(), false)
                 .map(maid -> new EntityModel<>(maid, //
-                        linkTo(methodOn(AgencyManager.class).showAllMaidUsagePlans()).withRel("maidUsagePlans"), //
+                        linkTo(methodOn(MaidOrderManager.class).showAllMaidUsagePlans()).withRel("maidUsagePlans"), //
                         linkTo(methodOn(AgencyManager.class).fetchAllMaids()).withRel("allMaids"))) //
                 .collect(Collectors.toList());
 
