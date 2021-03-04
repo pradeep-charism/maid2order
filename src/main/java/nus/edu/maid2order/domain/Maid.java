@@ -15,16 +15,16 @@
  *  * limitations under the License.
  *
  */
-package nus.edu.maid2order;
-
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
+package nus.edu.maid2order.domain;
 
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
 
 /**
  * Domain object representing a company employee. Project Lombok keeps actual code at a minimum. {@code @Data} -
@@ -42,37 +42,37 @@ import lombok.NoArgsConstructor;
 @Entity
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 @AllArgsConstructor
-class Maid {
+public class Maid {
 
-	@Id
-	@GeneratedValue
-	private Long id;
+    @Id
+    @GeneratedValue
+    private Long id;
 
-	private String firstName;
+    private String firstName;
 
-	private String lastName;
+    private String lastName;
 
-	private String role;
+    private String role;
 
-	/**
-	 * Useful constructor when id is not yet known.
-	 *
-	 * @param firstName
-	 * @param lastName
-	 * @param role
-	 */
-	Maid(String firstName, String lastName, String role) {
+    /**
+     * Useful constructor when id is not yet known.
+     *
+     * @param firstName
+     * @param lastName
+     * @param role
+     */
+    public Maid(String firstName, String lastName, String role) {
 
-		this.firstName = firstName;
-		this.lastName = lastName;
-		this.role = role;
-	}
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.role = role;
+    }
 
-	public Long getId() {
-		return id;
-	}
+    public Long getId() {
+        return id;
+    }
 
-	public void setId(Long id) {
-		this.id = id;
-	}
+    public void setId(Long id) {
+        this.id = id;
+    }
 }

@@ -15,8 +15,9 @@
  *  * limitations under the License.
  *
  */
-package nus.edu.maid2order;
+package nus.edu.maid2order.db;
 
+import nus.edu.maid2order.domain.Maid;
 import org.springframework.data.repository.CrudRepository;
 
 /**
@@ -24,5 +25,5 @@ import org.springframework.data.repository.CrudRepository;
  *
  * @author Greg Turnquist
  */
-interface MaidRepository extends CrudRepository<Maid, Long> {
+public interface MaidRepository extends CrudRepository<Maid, Long> {
 }

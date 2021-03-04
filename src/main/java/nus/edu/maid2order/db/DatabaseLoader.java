@@ -15,8 +15,9 @@
  *  * limitations under the License.
  *
  */
-package nus.edu.maid2order;
+package nus.edu.maid2order.db;
 
+import nus.edu.maid2order.domain.Maid;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
