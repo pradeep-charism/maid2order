@@ -27,10 +27,10 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 
 @SpringBootApplication
-public class SpringdocApplication {
+public class Maid2OrderSystem {
 
     public static void main(String[] args) {
-        SpringApplication.run(SpringdocApplication.class, args);
+        SpringApplication.run(Maid2OrderSystem.class, args);
     }
 
     @Bean
