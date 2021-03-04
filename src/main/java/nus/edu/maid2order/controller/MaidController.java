@@ -18,7 +18,12 @@
 package nus.edu.maid2order.controller;
 
 import nus.edu.maid2order.db.MaidRepository;
+import nus.edu.maid2order.db.MaidUsagePlanRepository;
 import nus.edu.maid2order.domain.Maid;
+import nus.edu.maid2order.domain.MaidUsagePlan;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.hateoas.IanaLinkRelations;
@@ -44,27 +49,51 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 @RestController
 public class MaidController {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(MaidController.class);
+
+    @Autowired
     private final MaidRepository repository;
+
+    @Autowired
+    private MaidUsagePlanRepository maidUsagePlan;
 
     public MaidController(MaidRepository repository) {
         this.repository = repository;
     }
 
     /**
-     * Look up all employees, and transform them into a REST collection resource. Then return them through Spring Web's
+     * Look up all maids usage plans
+     * {@link ResponseEntity} fluent API.
+     */
+    @GetMapping("/showAllMaidUsagePlans")
+    ResponseEntity<CollectionModel<EntityModel<MaidUsagePlan>>> showAllMaidUsagePlans() {
+
+        List<EntityModel<MaidUsagePlan>> maidUsagePlans = StreamSupport.stream(maidUsagePlan.findAll().spliterator(), false)
+                .map(plan -> new EntityModel<>(plan, //
+                        linkTo(methodOn(MaidController.class).findMaidById(plan.getId())).withSelfRel(), //
+                        linkTo(methodOn(MaidController.class).showAllMaidUsagePlans()).withRel("maidUsagePlans"))) //
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok( //
+                new CollectionModel<>(maidUsagePlans, //
+                        linkTo(methodOn(MaidController.class).showAllMaidUsagePlans()).withSelfRel()));
+    }
+
+    /**
+     * Look up all maids, and transform them into a REST collection resource. Then return them through Spring Web's
      * {@link ResponseEntity} fluent API.
      */
     @GetMapping("/fetchAllMaids")
     ResponseEntity<CollectionModel<EntityModel<Maid>>> fetchAllMaids() {
 
-        List<EntityModel<Maid>> employees = StreamSupport.stream(repository.findAll().spliterator(), false)
+        List<EntityModel<Maid>> maids = StreamSupport.stream(repository.findAll().spliterator(), false)
                 .map(maid -> new EntityModel<>(maid, //
                         linkTo(methodOn(MaidController.class).findMaidById(maid.getId())).withSelfRel(), //
-                        linkTo(methodOn(MaidController.class).fetchAllMaids()).withRel("employees"))) //
+                        linkTo(methodOn(MaidController.class).fetchAllMaids()).withRel("allMaids"))) //
                 .collect(Collectors.toList());
 
         return ResponseEntity.ok( //
-                new CollectionModel<>(employees, //
+                new CollectionModel<>(maids, //
                         linkTo(methodOn(MaidController.class).fetchAllMaids()).withSelfRel()));
     }
 
@@ -75,12 +104,12 @@ public class MaidController {
         try {
             Maid savedMaid = repository.save(maid);
 
-            EntityModel<Maid> employeeResource = new EntityModel<>(savedMaid, //
+            EntityModel<Maid> maidResource = new EntityModel<>(savedMaid, //
                     linkTo(methodOn(MaidController.class).findMaidById(savedMaid.getId())).withSelfRel());
 
             return ResponseEntity //
-                    .created(new URI(employeeResource.getRequiredLink(IanaLinkRelations.SELF).getHref())) //
-                    .body(employeeResource);
+                    .created(new URI(maidResource.getRequiredLink(IanaLinkRelations.SELF).getHref())) //
+                    .body(maidResource);
         } catch (URISyntaxException e) {
             return ResponseEntity.badRequest().body(null);
         }
@@ -98,13 +127,13 @@ public class MaidController {
         return repository.findById(id) //
                 .map(maid -> new EntityModel<>(maid, //
                         linkTo(methodOn(MaidController.class).findMaidById(maid.getId())).withSelfRel(), //
-                        linkTo(methodOn(MaidController.class).fetchAllMaids()).withRel("employees"))) //
+                        linkTo(methodOn(MaidController.class).fetchAllMaids()).withRel("maids"))) //
                 .map(ResponseEntity::ok) //
                 .orElse(ResponseEntity.notFound().build());
     }
 
     /**
-     * Update existing employee then return a Location header.
+     * Update existing maid then return a Location header.
      *
      * @param maid
      * @param id
@@ -124,4 +153,26 @@ public class MaidController {
 
     }
 
+    /**
+     * Release existing maid then return a Location header.
+     *
+     * @param id
+     * @return
+     */
+    @DeleteMapping("/releaseMaid/{id}")
+    @ResponseStatus(HttpStatus.OK)
+    ResponseEntity<CollectionModel<EntityModel<Maid>>> releaseMaid(@PathVariable long id) {
+        LOGGER.info("Releasing maid with id: [{}]", id);
+        repository.deleteById(id);
+
+        List<EntityModel<Maid>> maids = StreamSupport.stream(repository.findAll().spliterator(), false)
+                .map(maid -> new EntityModel<>(maid, //
+                        linkTo(methodOn(MaidController.class).showAllMaidUsagePlans()).withRel("maidUsagePlans"), //
+                        linkTo(methodOn(MaidController.class).fetchAllMaids()).withRel("allMaids"))) //
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok( //
+                new CollectionModel<>(maids, //
+                        linkTo(methodOn(MaidController.class).fetchAllMaids()).withSelfRel()));
+    }
 }

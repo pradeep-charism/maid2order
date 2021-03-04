@@ -18,6 +18,8 @@
 package nus.edu.maid2order.db;
 
 import nus.edu.maid2order.domain.Maid;
+import nus.edu.maid2order.domain.MaidUsagePlan;
+import nus.edu.maid2order.domain.UsagePlan;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
@@ -30,19 +32,30 @@ import org.springframework.stereotype.Component;
 @Component
 class DatabaseLoader {
 
-	/**
-	 * Use Spring to inject a {@link MaidRepository} that can then load data. Since this will run only after the app
-	 * is operational, the database will be up.
-	 *
-	 * @param repository
-	 */
-	@Bean
-	CommandLineRunner init(MaidRepository repository) {
+    /**
+     * Use Spring to inject a {@link MaidRepository} that can then load data. Since this will run only after the app
+     * is operational, the database will be up.
+     *
+     * @param repository
+     */
+    @Bean
+    CommandLineRunner loadMaids(MaidRepository repository) {
 
-		return args -> {
-			repository.save(new Maid("Frodo", "Baggins", "ring bearer"));
-			repository.save(new Maid("Bilbo", "Baggins", "burglar"));
-		};
-	}
+        return args -> {
+            repository.save(new Maid("Frodo", "Baggins", "ring bearer"));
+            repository.save(new Maid("Bilbo", "Baggins", "burglar"));
+        };
+    }
+
+    @Bean
+    CommandLineRunner loadMaidUsagePlan(MaidUsagePlanRepository repository) {
+
+        return args -> {
+            repository.save(new MaidUsagePlan(UsagePlan.ONE_TIME));
+            repository.save(new MaidUsagePlan(UsagePlan.ONCE_A_FORTNIGHT));
+            repository.save(new MaidUsagePlan(UsagePlan.ONCE_A_WEEK));
+            repository.save(new MaidUsagePlan(UsagePlan.TWICE_A_WEEK));
+        };
+    }
 
 }
