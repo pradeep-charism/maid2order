@@ -20,19 +20,20 @@ package nus.edu.maid2order.controller;
 import nus.edu.maid2order.db.CustomerRepository;
 import nus.edu.maid2order.db.MaidRepository;
 import nus.edu.maid2order.db.MaidUsagePlanRepository;
+import nus.edu.maid2order.domain.Customer;
 import nus.edu.maid2order.domain.Maid;
+import nus.edu.maid2order.domain.UsagePlan;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.Link;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -63,6 +64,31 @@ public class CustomerManager {
         this.maidRepository = maidRepository;
     }
 
+    /**
+     * Release existing maid then return a Location header.
+     *
+     * @param customer
+     * @return
+     */
+    @PostMapping("/orderNewMaidService/{plan}")
+    @ResponseStatus(HttpStatus.OK)
+    ResponseEntity<CollectionModel<EntityModel<Maid>>> orderNewMaidService(@RequestBody Customer customer, @PathVariable UsagePlan plan) {
+        LOGGER.info("Ordering new maid for Customer id: [{}]", customer);
+
+        String jackie = "Jackie " + Math.random();
+        Maid maid = new Maid(jackie, 35);
+        Maid savedMaid = maidRepository.save(maid);
+
+        List<EntityModel<Maid>> maids = new ArrayList<>();
+        maids.add(EntityModel.of(savedMaid));
+
+        Link link1 = linkTo(methodOn(AgencyManager.class).findMaidById(savedMaid.getMaidId())).withSelfRel();
+        Link link2 = linkTo(methodOn(MaidOrderManager.class).showAllMaidUsagePlans()).withRel("updateMaidUsagePlans");
+        Link link3 = linkTo(methodOn(CustomerManager.class).releaseHiredMaid(savedMaid.getMaidId())).withRel("cancelMaidOrderService");
+        return ResponseEntity.ok( //
+                new CollectionModel<>(maids, link1, link2, link3)
+        );
+    }
 
     /**
      * Release existing maid then return a Location header.

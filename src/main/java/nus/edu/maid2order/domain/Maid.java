@@ -46,28 +46,28 @@ public class Maid {
 
     @Id
     @GeneratedValue
-    private Long id;
+    private Long maidId;
 
-    private String name;
+    private String maidName;
 
-    private String role;
+    private int age;
 
     /**
      * Useful constructor when id is not yet known.
      *
-     * @param name
-     * @param role
+     * @param maidName
+     * @param age
      */
-    public Maid(String name, String role) {
-        this.name = name;
-        this.role = role;
+    public Maid(String maidName, int age) {
+        this.maidName = maidName;
+        this.age = age;
     }
 
-    public Long getId() {
-        return id;
+    public Long getMaidId() {
+        return maidId;
     }
 
-    public void setId(Long id) {
-        this.id = id;
+    public void setMaidId(Long maidId) {
+        this.maidId = maidId;
     }
 }

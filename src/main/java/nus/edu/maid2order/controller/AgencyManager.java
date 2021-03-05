@@ -74,7 +74,7 @@ public class AgencyManager {
 
         List<EntityModel<Maid>> maids = StreamSupport.stream(maidRepository.findAll().spliterator(), false)
                 .map(maid -> new EntityModel<>(maid, //
-                        linkTo(methodOn(AgencyManager.class).findMaidById(maid.getId())).withSelfRel(), //
+                        linkTo(methodOn(AgencyManager.class).findMaidById(maid.getMaidId())).withSelfRel(), //
                         linkTo(methodOn(AgencyManager.class).fetchAllMaids()).withRel("allMaids"))) //
                 .collect(Collectors.toList());
 
@@ -92,7 +92,7 @@ public class AgencyManager {
             Maid savedMaid = maidRepository.save(maid);
 
             EntityModel<Maid> maidResource = new EntityModel<>(savedMaid, //
-                    linkTo(methodOn(AgencyManager.class).findMaidById(savedMaid.getId())).withSelfRel());
+                    linkTo(methodOn(AgencyManager.class).findMaidById(savedMaid.getMaidId())).withSelfRel());
 
             return ResponseEntity //
                     .created(new URI(maidResource.getRequiredLink(IanaLinkRelations.SELF).getHref())) //
@@ -113,7 +113,7 @@ public class AgencyManager {
 
         return maidRepository.findById(id) //
                 .map(maid -> new EntityModel<>(maid, //
-                        linkTo(methodOn(AgencyManager.class).findMaidById(maid.getId())).withSelfRel(), //
+                        linkTo(methodOn(AgencyManager.class).findMaidById(maid.getMaidId())).withSelfRel(), //
                         linkTo(methodOn(AgencyManager.class).fetchAllMaids()).withRel("maids"))) //
                 .map(ResponseEntity::ok) //
                 .orElse(ResponseEntity.notFound().build());
@@ -131,7 +131,7 @@ public class AgencyManager {
     ResponseEntity<Void> updateMaid(@RequestBody Maid maid, @PathVariable long id) throws URISyntaxException {
 
         Maid maidToUpdate = maid;
-        maidToUpdate.setId(id);
+        maidToUpdate.setMaidId(id);
         maidRepository.save(maidToUpdate);
 
         Link newlyCreatedLink = linkTo(methodOn(AgencyManager.class).findMaidById(id)).withSelfRel();

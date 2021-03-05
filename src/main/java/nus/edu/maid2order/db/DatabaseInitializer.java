@@ -31,7 +31,7 @@ import org.springframework.stereotype.Component;
  * @author Pradeep Kumar
  */
 @Component
-class DatabaseLoader {
+public class DatabaseInitializer {
 
     /**
      * Use Spring to inject a {@link MaidRepository} that can then load data. Since this will run only after the app
@@ -43,10 +43,10 @@ class DatabaseLoader {
     CommandLineRunner loadMaids(MaidRepository repository) {
 
         return args -> {
-            repository.save(new Maid("Blue", "Cook"));
-            repository.save(new Maid("Red", "Washing"));
-            repository.save(new Maid("Green", "All tasks"));
-            repository.save(new Maid("Yellow", "Child Care"));
+            repository.save(new Maid("Anne", 25));
+            repository.save(new Maid("Borie", 35));
+            repository.save(new Maid("Charlie", 40));
+            repository.save(new Maid("Deon", 27));
         };
     }
 

@@ -17,11 +17,11 @@ public class Customer {
 
     @Id
     @GeneratedValue
-    private Long id;
+    private Long customerId;
 
-    private String name;
+    private String customerName;
 
-    public Customer(String name) {
-        this.name = name;
+    public Customer(String customerName) {
+        this.customerName = customerName;
     }
 }
