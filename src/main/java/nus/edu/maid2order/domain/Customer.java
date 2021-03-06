@@ -24,4 +24,8 @@ public class Customer {
     public Customer(String customerName) {
         this.customerName = customerName;
     }
+
+    public Long getCustomerId() {
+        return customerId;
+    }
 }

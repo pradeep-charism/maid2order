@@ -18,9 +18,9 @@
 package nus.edu.maid2order.controller;
 
 import nus.edu.maid2order.db.CustomerRepository;
+import nus.edu.maid2order.db.MaidOrderRepository;
 import nus.edu.maid2order.db.MaidRepository;
-import nus.edu.maid2order.db.MaidUsagePlanRepository;
-import nus.edu.maid2order.domain.MaidUsagePlan;
+import nus.edu.maid2order.domain.UsagePlan;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,8 +28,10 @@ import org.springframework.hateoas.CollectionModel;
 import org.springframework.hateoas.EntityModel;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -43,6 +45,7 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
  * @author Pradeep Kumar
  */
 @RestController
+@RequestMapping("/maid2order/maidOrderManager/api/v1/")
 public class MaidOrderManager {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MaidOrderManager.class);
@@ -51,7 +54,7 @@ public class MaidOrderManager {
     private final MaidRepository maidRepository;
 
     @Autowired
-    private MaidUsagePlanRepository maidUsagePlan;
+    private MaidOrderRepository maidUsagePlan;
 
     @Autowired
     private CustomerRepository customerRepository;
@@ -65,9 +68,11 @@ public class MaidOrderManager {
      * {@link ResponseEntity} fluent API.
      */
     @GetMapping("/showAllMaidUsagePlans")
-    ResponseEntity<CollectionModel<EntityModel<MaidUsagePlan>>> showAllMaidUsagePlans() {
+    ResponseEntity<CollectionModel<EntityModel<UsagePlan>>> showAllMaidUsagePlans() {
 
-        List<EntityModel<MaidUsagePlan>> maidUsagePlans = StreamSupport.stream(maidUsagePlan.findAll().spliterator(), false)
+        List<UsagePlan> usagePlans = Arrays.asList(UsagePlan.values());
+
+        List<EntityModel<UsagePlan>> maidUsagePlans = StreamSupport.stream(usagePlans.spliterator(), false)
                 .map(plan -> new EntityModel<>(plan, //
                         linkTo(methodOn(MaidOrderManager.class).showAllMaidUsagePlans()).withRel("maidUsagePlans"))) //
                 .collect(Collectors.toList());

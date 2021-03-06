@@ -37,7 +37,7 @@ public class Maid2OrderSystem {
     public OpenAPI customOpenAPI() {
         return new OpenAPI()
                 .components(new Components())
-                .info(new Info().title("Maid2Order API").version("1.5.5")
+                .info(new Info().title("Maid2Order Service API").version("1.5.5")
                         .license(new License().name("Apache 2.0").url("http://springdoc.org")));
     }
 }

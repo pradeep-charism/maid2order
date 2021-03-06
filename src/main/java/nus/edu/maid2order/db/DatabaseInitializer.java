@@ -17,10 +17,7 @@
  */
 package nus.edu.maid2order.db;
 
-import nus.edu.maid2order.domain.Customer;
-import nus.edu.maid2order.domain.Maid;
-import nus.edu.maid2order.domain.MaidUsagePlan;
-import nus.edu.maid2order.domain.UsagePlan;
+import nus.edu.maid2order.domain.*;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
@@ -51,13 +48,13 @@ public class DatabaseInitializer {
     }
 
     @Bean
-    CommandLineRunner loadMaidUsagePlan(MaidUsagePlanRepository repository) {
+    CommandLineRunner loadMaidOrder(MaidUsagePlanRepository repository) {
 
         return args -> {
-            repository.save(new MaidUsagePlan(UsagePlan.ONE_TIME, 10.0));
-            repository.save(new MaidUsagePlan(UsagePlan.ONCE_A_FORTNIGHT, 15.0));
-            repository.save(new MaidUsagePlan(UsagePlan.ONCE_A_WEEK, 10.0));
-            repository.save(new MaidUsagePlan(UsagePlan.TWICE_A_WEEK, 30.0));
+            repository.save(new OneTimeMaidUsagePlan());
+            repository.save(new OnceAFortnightMaidUsagePlan());
+            repository.save(new OnceAWeekMaidUsagePlan());
+            repository.save(new TwiceAWeekMaidUsagePlan());
         };
     }
 

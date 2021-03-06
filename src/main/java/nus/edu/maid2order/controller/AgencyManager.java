@@ -19,7 +19,7 @@ package nus.edu.maid2order.controller;
 
 import nus.edu.maid2order.db.CustomerRepository;
 import nus.edu.maid2order.db.MaidRepository;
-import nus.edu.maid2order.db.MaidUsagePlanRepository;
+import nus.edu.maid2order.db.MaidOrderRepository;
 import nus.edu.maid2order.domain.Maid;
 import nus.edu.maid2order.domain.UsagePlan;
 import org.slf4j.Logger;
@@ -48,6 +48,7 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
  * @author Pradeep Kumar
  */
 @RestController
+@RequestMapping("/maid2order/agencyManager/api/v1/")
 public class AgencyManager {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AgencyManager.class);
@@ -56,7 +57,7 @@ public class AgencyManager {
     private final MaidRepository maidRepository;
 
     @Autowired
-    private MaidUsagePlanRepository maidUsagePlan;
+    private MaidOrderRepository maidUsagePlan;
 
     @Autowired
     private CustomerRepository customerRepository;
@@ -126,9 +127,9 @@ public class AgencyManager {
      * @param id
      * @return
      */
-    @PutMapping("/updateMaid/{id}")
+    @PutMapping("/updateMaidParticulars/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    ResponseEntity<Void> updateMaid(@RequestBody Maid maid, @PathVariable long id) throws URISyntaxException {
+    ResponseEntity<Void> updateMaidParticulars(@RequestBody Maid maid, @PathVariable long id) throws URISyntaxException {
 
         Maid maidToUpdate = maid;
         maidToUpdate.setMaidId(id);

@@ -19,7 +19,7 @@ package nus.edu.maid2order.db;
 
 import nus.edu.maid2order.domain.Maid;
 import nus.edu.maid2order.domain.MaidOrder;
-import nus.edu.maid2order.domain.MaidUsagePlan;
+import nus.edu.maid2order.domain.OneTimeMaidUsagePlan;
 import org.springframework.data.repository.CrudRepository;
 
 /**
@@ -27,5 +27,5 @@ import org.springframework.data.repository.CrudRepository;
  *
  * @author Greg Turnquist
  */
-public interface MaidUsagePlanRepository extends CrudRepository<MaidUsagePlan, Long> {
+public interface MaidOrderRepository extends CrudRepository<MaidOrder, Long> {
 }

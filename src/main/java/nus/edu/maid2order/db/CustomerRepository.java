@@ -19,7 +19,6 @@ package nus.edu.maid2order.db;
 
 import nus.edu.maid2order.domain.Customer;
 import nus.edu.maid2order.domain.Maid;
-import nus.edu.maid2order.domain.MaidUsagePlan;
 import org.springframework.data.repository.CrudRepository;
 
 /**

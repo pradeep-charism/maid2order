@@ -18,11 +18,10 @@
 package nus.edu.maid2order.controller;
 
 import nus.edu.maid2order.db.CustomerRepository;
+import nus.edu.maid2order.db.MaidOrderRepository;
 import nus.edu.maid2order.db.MaidRepository;
 import nus.edu.maid2order.db.MaidUsagePlanRepository;
-import nus.edu.maid2order.domain.Customer;
-import nus.edu.maid2order.domain.Maid;
-import nus.edu.maid2order.domain.UsagePlan;
+import nus.edu.maid2order.domain.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,8 +34,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
+import java.util.Optional;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
@@ -47,6 +45,7 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
  * @author Pradeep Kumar
  */
 @RestController
+@RequestMapping("/maid2order/customerManager/api/v1/")
 public class CustomerManager {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CustomerManager.class);
@@ -55,7 +54,10 @@ public class CustomerManager {
     private final MaidRepository maidRepository;
 
     @Autowired
-    private MaidUsagePlanRepository maidUsagePlan;
+    private MaidOrderRepository maidOrderRepository;
+
+    @Autowired
+    private MaidUsagePlanRepository maidUsagePlanRepository;
 
     @Autowired
     private CustomerRepository customerRepository;
@@ -65,51 +67,85 @@ public class CustomerManager {
     }
 
     /**
-     * Release existing maid then return a Location header.
+     * Customer orders a new Maid with a Usage Plan.
      *
      * @param customer
      * @return
      */
-    @PostMapping("/orderNewMaidService/{plan}")
+    @PostMapping("/orderNewMaidService/{maidUsagePlan}")
     @ResponseStatus(HttpStatus.OK)
-    ResponseEntity<CollectionModel<EntityModel<Maid>>> orderNewMaidService(@RequestBody Customer customer, @PathVariable UsagePlan plan) {
+    ResponseEntity<CollectionModel<EntityModel<Maid>>> orderNewMaidService(@RequestBody Customer customer, @PathVariable UsagePlan maidUsagePlan) {
         LOGGER.info("Ordering new maid for Customer id: [{}]", customer);
 
-        String jackie = "Jackie " + Math.random();
+        String jackie = "Jackie ";
         Maid maid = new Maid(jackie, 35);
         Maid savedMaid = maidRepository.save(maid);
+
+        MaidOrder maidOrder = new MaidOrder(savedMaid.getMaidId(), customer.getCustomerId(), maidUsagePlan.getId());
+        maidOrderRepository.save(maidOrder);
 
         List<EntityModel<Maid>> maids = new ArrayList<>();
         maids.add(EntityModel.of(savedMaid));
 
         Link link1 = linkTo(methodOn(AgencyManager.class).findMaidById(savedMaid.getMaidId())).withSelfRel();
         Link link2 = linkTo(methodOn(MaidOrderManager.class).showAllMaidUsagePlans()).withRel("updateMaidUsagePlans");
-        Link link3 = linkTo(methodOn(CustomerManager.class).releaseHiredMaid(savedMaid.getMaidId())).withRel("cancelMaidOrderService");
+        Link link3 = linkTo(methodOn(CustomerManager.class).cancelMaidOrderService(customer.getCustomerId(), savedMaid.getMaidId())).withRel("cancelMaidOrderService");
         return ResponseEntity.ok( //
                 new CollectionModel<>(maids, link1, link2, link3)
         );
     }
 
     /**
-     * Release existing maid then return a Location header.
+     * Customer orders a new Maid with a Usage Plan.
      *
-     * @param id
+     * @param customerId
      * @return
      */
-    @DeleteMapping("/releaseHiredMaid/{id}")
+    @PostMapping("/calculateMaidUsageBill/{customerId}")
     @ResponseStatus(HttpStatus.OK)
-    ResponseEntity<CollectionModel<EntityModel<Maid>>> releaseHiredMaid(@PathVariable long id) {
-        LOGGER.info("Releasing maid with id: [{}]", id);
-        maidRepository.deleteById(id);
+    ResponseEntity<CollectionModel<EntityModel<MaidUsageBill>>> calculateMaidUsageBill(@PathVariable Long customerId) {
+        LOGGER.info("Ordering new maid for Customer id: [{}]", customerId);
 
-        List<EntityModel<Maid>> maids = StreamSupport.stream(maidRepository.findAll().spliterator(), false)
-                .map(maid -> new EntityModel<>(maid, //
-                        linkTo(methodOn(MaidOrderManager.class).showAllMaidUsagePlans()).withRel("maidUsagePlans"), //
-                        linkTo(methodOn(AgencyManager.class).fetchAllMaids()).withRel("allMaids"))) //
-                .collect(Collectors.toList());
+        Optional<MaidOrder> maidOrderOptional = maidOrderRepository.findById(customerId);
+        MaidOrder maidOrder = maidOrderOptional.orElse(null);
 
+        Optional<MaidUsagePlan> plan = maidUsagePlanRepository.findById(maidOrder.getMaidUsagePlanId());
+        maidOrder.calculateCost(plan.get());
+
+        MaidUsageBill maidUsageBill = new MaidUsageBill(maidOrder.getMaidId(), maidOrder.getCustomerId(), plan.get().getUsagePlan(), maidOrder.calculateCost(plan.get()));
+        List<EntityModel<MaidUsageBill>> maids = new ArrayList<>();
+        maids.add(EntityModel.of(maidUsageBill));
+
+        Link link2 = linkTo(methodOn(MaidOrderManager.class).showAllMaidUsagePlans()).withRel("updateMaidUsagePlans");
         return ResponseEntity.ok( //
-                new CollectionModel<>(maids, //
-                        linkTo(methodOn(AgencyManager.class).fetchAllMaids()).withSelfRel()));
+                new CollectionModel<>(maids, link2)
+        );
+    }
+
+    /**
+     * Cancel maid service.
+     *
+     * @param customerId
+     * @param maidId
+     * @return
+     */
+    @DeleteMapping("/cancelMaidOrderService/{customerId}/{maidId}")
+    @ResponseStatus(HttpStatus.OK)
+    ResponseEntity<CollectionModel<EntityModel<Maid>>> cancelMaidOrderService(@PathVariable Long customerId, @PathVariable long maidId) {
+        LOGGER.info("Releasing maid with id: [{}]", maidId);
+
+        Optional<Maid> cancelledOrder = maidRepository.findById(maidId);
+        maidRepository.deleteById(maidId);
+
+        Customer customer = customerRepository.findById(customerId).get();
+
+        List<EntityModel<Maid>> maids = new ArrayList<>();
+        maids.add(EntityModel.of(cancelledOrder.get()));
+
+        Link orderNewMaidService = linkTo(methodOn(CustomerManager.class).orderNewMaidService(customer, UsagePlan.ONCE_A_WEEK)).withRel("orderNewMaidService");
+        Link maidUsagePlans = linkTo(methodOn(MaidOrderManager.class).showAllMaidUsagePlans()).withRel("maidUsagePlans");
+        Link selfRel = linkTo(methodOn(AgencyManager.class).fetchAllMaids()).withSelfRel();
+        return ResponseEntity.ok( //
+                new CollectionModel<>(maids, selfRel, maidUsagePlans, orderNewMaidService));
     }
 }
