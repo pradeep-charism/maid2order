@@ -25,7 +25,6 @@ import org.springframework.data.repository.CrudRepository;
 /**
  * A simple Spring Data {@link CrudRepository} for storing {@link Maid}s.
  *
- * @author Greg Turnquist
  */
 public interface MaidUsagePlanRepository extends CrudRepository<MaidUsagePlan, Long> {
 }

@@ -21,4 +21,12 @@ public enum UsagePlan {
     public Long getId() {
         return id;
     }
+
+    @Override
+    public String toString() {
+        return "UsagePlan{" +
+                "id=" + id +
+                ", cost=" + cost +
+                '}';
+    }
 }

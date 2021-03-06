@@ -36,7 +36,6 @@ import javax.persistence.Id;
  * things like _links to be ignore as well, meaning HAL documents can be fetched and later posted to the server without
  * adjustment.
  *
- * @author Greg Turnquist
  */
 @Data
 @Entity

@@ -25,7 +25,6 @@ import org.springframework.stereotype.Component;
 /**
  * Pre-load some data using a Spring Boot {@link CommandLineRunner}.
  *
- * @author Pradeep Kumar
  */
 @Component
 public class DatabaseInitializer {

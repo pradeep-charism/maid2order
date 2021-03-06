@@ -23,7 +23,6 @@ import org.springframework.data.repository.CrudRepository;
 /**
  * A simple Spring Data {@link CrudRepository} for storing {@link Maid}s.
  *
- * @author Greg Turnquist
  */
 public interface MaidRepository extends CrudRepository<Maid, Long> {
 }
