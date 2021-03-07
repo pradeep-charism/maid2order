@@ -68,12 +68,12 @@ public class MaidOrderManager {
      * {@link ResponseEntity} fluent API.
      */
     @GetMapping("/showAllMaidUsagePlans")
-    ResponseEntity<CollectionModel<EntityModel<UsagePlan>>> showAllMaidUsagePlans() {
+    ResponseEntity<CollectionModel<EntityModel<String>>> showAllMaidUsagePlans() {
 
         List<UsagePlan> usagePlans = Arrays.asList(UsagePlan.values());
 
-        List<EntityModel<UsagePlan>> maidUsagePlans = StreamSupport.stream(usagePlans.spliterator(), false)
-                .map(plan -> new EntityModel<>(plan, //
+        List<EntityModel<String>> maidUsagePlans = StreamSupport.stream(usagePlans.spliterator(), false)
+                .map(plan -> new EntityModel<>(plan.name(), //
                         linkTo(methodOn(MaidOrderManager.class).showAllMaidUsagePlans()).withRel("maidUsagePlans"))) //
                 .collect(Collectors.toList());
 
