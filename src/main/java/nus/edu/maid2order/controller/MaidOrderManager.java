@@ -25,7 +25,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.CollectionModel;
-import org.springframework.hateoas.EntityModel;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -33,8 +32,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
@@ -66,17 +63,13 @@ public class MaidOrderManager {
     /**
      * Look up all maids usage plans
      * {@link ResponseEntity} fluent API.
+     *
      * @return
      */
     @GetMapping("/showAllMaidUsagePlans")
     ResponseEntity<CollectionModel<UsagePlan>> showAllMaidUsagePlans() {
 
         List<UsagePlan> usagePlans = Arrays.asList(UsagePlan.values());
-
-        List<EntityModel<String>> maidUsagePlans = StreamSupport.stream(usagePlans.spliterator(), false)
-                .map(plan -> new EntityModel<>(plan.name(), //
-                        linkTo(methodOn(MaidOrderManager.class).showAllMaidUsagePlans()).withRel("maidUsagePlans"))) //
-                .collect(Collectors.toList());
 
         return ResponseEntity.ok( //
                 new CollectionModel<>(usagePlans, //
