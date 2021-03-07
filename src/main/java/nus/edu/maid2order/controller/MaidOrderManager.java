@@ -66,9 +66,10 @@ public class MaidOrderManager {
     /**
      * Look up all maids usage plans
      * {@link ResponseEntity} fluent API.
+     * @return
      */
     @GetMapping("/showAllMaidUsagePlans")
-    ResponseEntity<CollectionModel<EntityModel<String>>> showAllMaidUsagePlans() {
+    ResponseEntity<CollectionModel<UsagePlan>> showAllMaidUsagePlans() {
 
         List<UsagePlan> usagePlans = Arrays.asList(UsagePlan.values());
 
@@ -78,7 +79,7 @@ public class MaidOrderManager {
                 .collect(Collectors.toList());
 
         return ResponseEntity.ok( //
-                new CollectionModel<>(maidUsagePlans, //
+                new CollectionModel<>(usagePlans, //
                         linkTo(methodOn(MaidOrderManager.class).showAllMaidUsagePlans()).withSelfRel()));
     }
 }
